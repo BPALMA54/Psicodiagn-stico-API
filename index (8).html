@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psicodiagnóstico Práctica — Docente Bryan Palma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4fa;color:#1a1a2e;min-height:100vh}
+:root{--azul:#1B3A6B;--azul2:#2E5FA3;--azul3:#D6E4F7;--verde:#1A6B3A;--verde2:#D6F0E0;--naranja:#C25E00;--naranja2:#FFF0D6;--morado:#4A1D96;--morado2:#EDE9FE;--rojo:#991B1B;--rojo2:#FEE2E2;--gris:#F5F7FA;--borde:#C5D1E0}
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+header{background:var(--azul);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:17px;font-weight:700;letter-spacing:.3px}
+.header-sub{font-size:12px;opacity:.8;margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:.2s}
+.btn-primary{background:var(--azul2);color:#fff}
+.btn-primary:hover{background:var(--azul)}
+.btn-success{background:var(--verde);color:#fff}
+.btn-success:hover{background:#145c2e}
+.btn-outline{background:#fff;color:var(--azul2);border:2px solid var(--azul2)}
+.btn-outline:hover{background:var(--azul3)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-danger{background:var(--rojo);color:#fff}
+.btn-naranja{background:var(--naranja);color:#fff}
+.btn-morado{background:var(--morado);color:#fff}
+.card{background:#fff;border-radius:14px;border:1px solid var(--borde);padding:22px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-azul{background:var(--azul3);color:var(--azul)}
+.badge-verde{background:var(--verde2);color:var(--verde)}
+.badge-naranja{background:var(--naranja2);color:var(--naranja)}
+.badge-morado{background:var(--morado2);color:var(--morado)}
+.badge-rojo{background:var(--rojo2);color:var(--rojo)}
+input[type=text],input[type=password],textarea,select{width:100%;padding:10px 14px;border:1.5px solid var(--borde);border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:.2s}
+input:focus,textarea:focus,select:focus{border-color:var(--azul2);box-shadow:0 0 0 3px rgba(46,95,163,.15)}
+textarea{resize:vertical;min-height:100px}
+.progress-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:var(--azul2);border-radius:4px;transition:width .4s}
+.correct{background:#d1fae5;border:2px solid #059669;border-radius:8px}
+.incorrect{background:#fee2e2;border:2px solid #dc2626;border-radius:8px}
+.feedback-box{padding:14px 18px;border-radius:10px;margin-top:12px;font-size:14px;line-height:1.6}
+.feedback-ok{background:var(--verde2);border-left:4px solid var(--verde);color:#14532d}
+.feedback-mal{background:var(--rojo2);border-left:4px solid var(--rojo);color:#7f1d1d}
+.tag{display:inline-block;padding:5px 12px;border-radius:20px;margin:4px;cursor:pointer;font-size:13px;font-weight:500;border:2px solid transparent;transition:.2s;user-select:none}
+.tag-neutral{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+.tag-neutral:hover{border-color:var(--azul2);color:var(--azul2)}
+.tag-selected-azul{background:var(--azul3);color:var(--azul);border-color:var(--azul2)}
+.tag-selected-verde{background:var(--verde2);color:var(--verde);border-color:var(--verde)}
+.tag-correct-final{background:#d1fae5;border-color:#059669;color:#065f46}
+.tag-incorrect-final{background:#fee2e2;border-color:#dc2626;color:#991b1b}
+.sesion-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:16px}
+.sesion-card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px 14px;text-align:center;cursor:pointer;transition:.2s}
+.sesion-card:hover{border-color:var(--azul2);background:var(--azul3);transform:translateY(-2px)}
+.sesion-card.completada{border-color:var(--verde);background:var(--verde2)}
+.juego-card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:20px;cursor:pointer;transition:.2s;display:flex;align-items:flex-start;gap:14px}
+.juego-card:hover{border-color:var(--azul2);transform:translateY(-2px)}
+.juego-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.theory-section{margin-bottom:24px}
+.theory-section h3{font-size:16px;font-weight:700;color:var(--azul);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--azul3)}
+.theory-section p{font-size:14px;line-height:1.75;color:#334155;margin-bottom:8px}
+.theory-section ul{padding-left:20px}
+.theory-section li{font-size:14px;line-height:1.75;color:#334155;margin-bottom:4px}
+.nivel-box{border-radius:12px;padding:18px;margin-bottom:16px}
+.nivel-1{background:var(--azul3);border-left:5px solid var(--azul2)}
+.nivel-2{background:var(--morado2);border-left:5px solid var(--morado)}
+.nivel-box h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.nivel-1 h4{color:var(--azul)}
+.nivel-2 h4{color:var(--morado)}
+.caso-box{background:#f8fafc;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:18px;font-size:14px;line-height:1.8;color:#1e293b}
+.caso-box strong{color:var(--azul);font-weight:700}
+.nav-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--borde)}
+.score-display{font-size:18px;font-weight:700;color:var(--azul2)}
+.resultado-final{text-align:center;padding:24px}
+.star{font-size:40px}
+table.admin-table{width:100%;border-collapse:collapse;font-size:13px}
+table.admin-table th{background:var(--azul);color:#fff;padding:10px 12px;text-align:left}
+table.admin-table td{padding:9px 12px;border-bottom:1px solid var(--borde);vertical-align:top}
+table.admin-table tr:nth-child(even) td{background:#f8fafc}
+.resp-cell{max-width:200px;word-break:break-word}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ PANTALLA INICIO ═══════════════════════════════════ -->
+<div id="screen-inicio" class="screen active">
+<header>
+  <div>
+    <div class="header-title">🧠 Psicodiagnóstico Práctica</div>
+    <div class="header-sub">Docente: Bryan Palma | Campus María Auxiliadora</div>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="abrirAdmin()">🔒 Panel Docente</button>
+</header>
+<div style="max-width:860px;margin:0 auto;padding:28px 20px">
+  <div style="text-align:center;margin-bottom:32px">
+    <h1 style="font-size:26px;font-weight:800;color:var(--azul);margin-bottom:8px">Aprende Psicodiagnóstico Jugando</h1>
+    <p style="color:#64748b;font-size:15px">Domina la observación clínica de primer y segundo nivel a través de casos reales</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
+    <div class="card" style="border-left:5px solid var(--azul2);cursor:pointer" onclick="irTeoria()">
+      <div style="font-size:28px;margin-bottom:10px">📖</div>
+      <div style="font-size:16px;font-weight:700;color:var(--azul);margin-bottom:6px">Marco Teórico</div>
+      <div style="font-size:13px;color:#64748b">Fundamentos de la observación de primer y segundo nivel en psicodiagnóstico</div>
+      <div style="margin-top:12px"><span class="badge badge-azul">Inicio aquí</span></div>
+    </div>
+    <div class="card" style="border-left:5px solid var(--verde);cursor:pointer" onclick="irSesiones()">
+      <div style="font-size:28px;margin-bottom:10px">🎮</div>
+      <div style="font-size:16px;font-weight:700;color:var(--verde);margin-bottom:6px">Sesiones de Juego</div>
+      <div style="font-size:13px;color:#64748b">8 casos clínicos por sesión con 5 modalidades de juego distintas</div>
+      <div style="margin-top:12px"><span class="badge badge-verde">5 juegos</span></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <h3 style="font-size:15px;font-weight:700;color:var(--azul);margin-bottom:14px">🎯 Los 5 Juegos Disponibles</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--azul3);border-radius:10px">
+        <span style="font-size:20px">🔍</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--azul)">Detecta el Primer Nivel</div><div style="font-size:12px;color:#475569;margin-top:2px">Identifica y selecciona observaciones objetivas</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--morado2);border-radius:10px">
+        <span style="font-size:20px">🧩</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--morado)">Construye la Inferencia</div><div style="font-size:12px;color:#475569;margin-top:2px">Elabora el segundo nivel desde lo observado</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--naranja2);border-radius:10px">
+        <span style="font-size:20px">❓</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--naranja)">El Interrogatorio Clínico</div><div style="font-size:12px;color:#475569;margin-top:2px">Formula preguntas para recabar más información</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--verde2);border-radius:10px">
+        <span style="font-size:20px">🏷️</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--verde)">Clasifica la Observación</div><div style="font-size:12px;color:#475569;margin-top:2px">¿Es primer o segundo nivel?</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--rojo2);border-radius:10px">
+        <span style="font-size:20px">📝</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--rojo)">Completa el Registro</div><div style="font-size:12px;color:#475569;margin-top:2px">Escribe lo que observarías en cada nivel</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <label style="font-size:14px;font-weight:600;color:var(--azul);display:block;margin-bottom:8px">👤 Tu nombre (para el registro docente):</label>
+    <div style="display:flex;gap:10px">
+      <input type="text" id="nombre-estudiante" placeholder="Ej: María Pérez" style="flex:1">
+      <button class="btn btn-primary" onclick="guardarNombre()">Guardar</button>
+    </div>
+    <div id="nombre-confirmado" style="display:none;margin-top:8px;color:var(--verde);font-size:13px;font-weight:600">✅ Nombre guardado. ¡Puedes comenzar a jugar!</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ PANTALLA TEORÍA ═══════════════════════════════════ -->
+<div id="screen-teoria" class="screen">
+<header>
+  <div>
+    <div class="header-title">📖 Marco Teórico — Psicodiagnóstico Práctica</div>
+    <div class="header-sub">Docente: Bryan Palma</div>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="irInicio()">← Inicio</button>
+</header>
+<div style="max-width:820px;margin:0 auto;padding:28px 20px">
+  <div class="card" style="margin-bottom:20px">
+    <div class="theory-section">
+      <h3>¿Qué es la observación clínica en psicodiagnóstico?</h3>
+      <p>En el proceso de psicodiagnóstico, la observación clínica es una herramienta fundamental que el evaluador utiliza desde el primer contacto con el paciente. No se limita a "mirar": implica un registro sistemático y diferenciado de lo que el clínico percibe, distinguiendo entre aquello que es directamente observable y aquello que requiere interpretación.</p>
+      <p>La distinción entre <strong>observación de primer nivel</strong> y <strong>observación de segundo nivel</strong> es esencial para garantizar la objetividad del proceso evaluativo y evitar que las hipótesis clínicas contaminen los datos empíricos.</p>
+    </div>
+    <div class="nivel-box nivel-1">
+      <h4>🔵 Observación de Primer Nivel — "Lo que veo"</h4>
+      <p style="font-size:14px;line-height:1.75;color:#1e3a5f;margin-bottom:10px">Es la observación <strong>directa, objetiva y descriptiva</strong> de lo que el evaluador percibe de manera inmediata en el paciente, sin interpretación. Se registra exactamente tal como se ve o escucha, y puede ser verificado por cualquier otro observador externo.</p>
+      <p style="font-size:13px;font-weight:700;color:var(--azul);margin-bottom:6px">¿Qué se registra en el primer nivel?</p>
+      <ul style="padding-left:20px">
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Apariencia física y arreglo personal (ropa, higiene, cabello)</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Conducta motora: agitación, enlentecimiento, tics, temblores</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Expresión facial: sonríe, frunce el ceño, mantiene el rostro inexpresivo</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Contacto visual: evita la mirada, mantiene contacto sostenido, desvía la vista</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Tono, volumen y ritmo del habla: habla rápido, en voz baja, con pausas prolongadas</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Postura y lenguaje corporal: brazos cruzados, inclinación hacia adelante, tensión muscular visible</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Actitud hacia el evaluador: cooperativo, reticente, hostil (en términos de conducta observable)</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Presencia de llanto, sudoración, enrojecimiento facial</li>
+        <li style="font-size:14px;line-height:1.75;color:#1e3a5f">Forma del discurso: habla en exceso, responde con monosílabos, hace pausas, cambia de tema</li>
+      </ul>
+      <div style="margin-top:12px;padding:10px 14px;background:#fff;border-radius:8px;font-size:13px;color:#1e3a5f">
+        <strong>Ejemplo:</strong> "La paciente ingresa al consultorio con ropa desaliñada, el cabello sin peinar. Mantiene la mirada hacia el suelo durante los primeros cinco minutos de la sesión. Habla en voz baja y con pausas de más de 5 segundos entre frases."
+      </div>
+    </div>
+    <div class="nivel-box nivel-2">
+      <h4>🟣 Observación de Segundo Nivel — "Lo que significa lo que veo"</h4>
+      <p style="font-size:14px;line-height:1.75;color:#3b0764;margin-bottom:10px">Es la observación <strong>inferencial e interpretativa</strong>. A partir de los datos del primer nivel, el clínico elabora hipótesis, construye inferencias y asocia los datos observados con categorías clínicas o psicopatológicas. Requiere formación clínica y un marco teórico sólido.</p>
+      <p style="font-size:13px;font-weight:700;color:var(--morado);margin-bottom:6px">¿Qué se construye en el segundo nivel?</p>
+      <ul style="padding-left:20px">
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Inferir un estado afectivo a partir de la postura y el llanto observados</li>
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Relacionar la logorrea y el habla acelerada con un posible estado maníaco o hipomaníaco</li>
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Interpretar la evitación sostenida del contacto visual como posible ansiedad social, timidez extrema o rasgos esquizoides</li>
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Asociar el pensamiento disgregado (habla incoherente, saltos temáticos) con un cuadro psicótico</li>
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Interpretar el descuido en el arreglo personal como posible indicador de anhedonia, depresión mayor o deterioro funcional</li>
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Atribuir la rigidez postural y la expresión facial inexpresiva a un posible embotamiento afectivo</li>
+        <li style="font-size:14px;line-height:1.75;color:#3b0764">Relacionar la hostilidad verbal con rasgos de personalidad paranoide o reacción defensiva ante la evaluación</li>
+      </ul>
+      <div style="margin-top:12px;padding:10px 14px;background:#fff;border-radius:8px;font-size:13px;color:#3b0764">
+        <strong>Ejemplo:</strong> "El descuido en el arreglo personal, combinado con la evitación del contacto visual y el habla enlentecida, sugiere la presencia de un estado depresivo con posible anhedonia y retraimiento social."
+      </div>
+    </div>
+    <div class="theory-section">
+      <h3>La diferencia clave</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="padding:14px;background:#f0f9ff;border-radius:10px;border-left:4px solid var(--azul2)">
+          <div style="font-size:13px;font-weight:700;color:var(--azul);margin-bottom:6px">Primer Nivel DESCRIBE</div>
+          <div style="font-size:13px;color:#334155">El dato es objetivo, verificable, no requiere interpretación. Cualquier observador entrenado registraría lo mismo.</div>
+        </div>
+        <div style="padding:14px;background:#faf5ff;border-radius:10px;border-left:4px solid var(--morado)">
+          <div style="font-size:13px;font-weight:700;color:var(--morado);margin-bottom:6px">Segundo Nivel INTERPRETA</div>
+          <div style="font-size:13px;color:#334155">El dato requiere un marco teórico-clínico. Es una hipótesis fundamentada, no una certeza diagnóstica.</div>
+        </div>
+      </div>
+    </div>
+    <div class="theory-section">
+      <h3>Importancia en la ficha de observación clínica</h3>
+      <p>En una buena ficha de observación clínica, los dos niveles deben quedar <strong>claramente diferenciados</strong> para no contaminar el dato objetivo con la hipótesis del evaluador. Mezclar ambos niveles —registrar directamente una interpretación como si fuera un dato observable— constituye uno de los errores más frecuentes en el proceso psicodiagnóstico.</p>
+      <p>El primer nivel alimenta al segundo: no se puede construir una inferencia clínica sólida sin un registro descriptivo preciso y completo de lo observado. Por ello, el entrenamiento en la distinción entre ambos niveles es fundamental para el desarrollo de competencias clínicas.</p>
+    </div>
+    <div class="theory-section">
+      <h3>Errores comunes que debes evitar</h3>
+      <ul>
+        <li>"<em>El paciente está deprimido</em>" → ❌ Segundo nivel presentado como dato directo. Lo correcto: registrar qué observaciones conducen a esa inferencia.</li>
+        <li>"<em>El paciente se ve triste</em>" → ⚠️ Ambiguo. ¿Qué observaste exactamente? ¿Lloró? ¿Expresión facial caída? ¿Voz entrecortada?</li>
+        <li>"<em>Parece ansioso</em>" → ❌ Inferencia sin sustento descriptivo. Lo correcto: "El paciente mueve repetidamente las manos sobre sus piernas, sudoración visible en la frente, voz con ligero temblor."</li>
+      </ul>
+    </div>
+  </div>
+  <div style="text-align:center">
+    <button class="btn btn-success" onclick="irSesiones()" style="font-size:16px;padding:14px 32px">🎮 Ir a las Sesiones de Juego →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ PANTALLA SESIONES ═══════════════════════════════════ -->
+<div id="screen-sesiones" class="screen">
+<header>
+  <div>
+    <div class="header-title">🎮 Sesiones de Juego — Psicodiagnóstico Práctica</div>
+    <div class="header-sub">Docente: Bryan Palma</div>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="irInicio()">← Inicio</button>
+</header>
+<div style="max-width:860px;margin:0 auto;padding:28px 20px">
+  <div id="sesiones-lista"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ PANTALLA JUEGOS ═══════════════════════════════════ -->
+<div id="screen-juegos" class="screen">
+<header>
+  <div>
+    <div class="header-title" id="juegos-header-title">Juegos</div>
+    <div class="header-sub" id="juegos-header-sub">Psicodiagnóstico Práctica — Docente Bryan Palma</div>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="irSesiones()">← Sesiones</button>
+</header>
+<div style="max-width:820px;margin:0 auto;padding:28px 20px">
+  <div id="juegos-lista"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ PANTALLA JUEGO ACTIVO ═══════════════════════════════════ -->
+<div id="screen-juego" class="screen">
+<header>
+  <div>
+    <div class="header-title" id="juego-titulo-header">Juego</div>
+    <div class="header-sub">Psicodiagnóstico Práctica — Docente Bryan Palma</div>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="volverJuegos()">← Juegos</button>
+</header>
+<div style="max-width:820px;margin:0 auto;padding:28px 20px">
+  <div id="juego-contenido"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL ADMIN ═══════════════════════════════════ -->
+<div id="modal-admin" class="modal-overlay" style="display:none">
+<div class="modal">
+  <h2 style="font-size:18px;font-weight:700;color:var(--azul);margin-bottom:16px">🔒 Panel Docente</h2>
+  <div id="admin-login">
+    <p style="font-size:14px;color:#64748b;margin-bottom:12px">Ingrese la contraseña docente:</p>
+    <input type="password" id="admin-pass" placeholder="Contraseña" style="margin-bottom:12px">
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="verificarAdmin()">Ingresar</button>
+      <button class="btn btn-outline" onclick="cerrarAdmin()">Cancelar</button>
+    </div>
+    <div id="admin-error" style="display:none;color:var(--rojo);font-size:13px;margin-top:8px">❌ Contraseña incorrecta</div>
+  </div>
+  <div id="admin-panel" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span class="badge badge-verde">✅ Acceso concedido</span>
+      <button class="btn btn-outline btn-sm" onclick="cerrarAdmin()">Cerrar</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;color:var(--azul);display:block;margin-bottom:6px">Filtrar por juego:</label>
+      <select id="admin-filtro" onchange="filtrarRespuestas()">
+        <option value="">Todos los juegos</option>
+        <option value="J1">Detecta el Primer Nivel</option>
+        <option value="J2">Construye la Inferencia</option>
+        <option value="J3">El Interrogatorio Clínico</option>
+        <option value="J4">Clasifica la Observación</option>
+        <option value="J5">Completa el Registro</option>
+      </select>
+    </div>
+    <div id="admin-tabla" style="overflow-x:auto;max-height:400px;overflow-y:auto"></div>
+    <div style="margin-top:12px">
+      <button class="btn btn-primary btn-sm" onclick="exportarCSV()">⬇ Exportar CSV</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const CONFIG = {
+  PASSWORD: "palma2025",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxv5Ae_jJnHqaJA4lc6FXRdhXlFBrPKpxdsdSgKgglK5mQcnBkl0kWuoFvlDSPRveCm/exec"
+};
+
+const CASOS = [
+  {id:1, texto:`<strong>Caso 1 — Adriana, 28 años:</strong> Llega a consulta 20 minutos tarde. Ingresa sin saludar, deja caer su bolso sobre la silla y se sienta con los brazos cruzados. Durante los primeros minutos responde únicamente con monosílabos. Su ropa está arrugada y lleva el cabello recogido de forma descuidada. Mientras habla, evita el contacto visual y dirige la mirada hacia la ventana.`,
+   n1:["Llega 20 minutos tarde","Ingresa sin saludar","Deja caer el bolso sobre la silla","Se sienta con brazos cruzados","Responde con monosílabos","Ropa arrugada, cabello descuidado","Evita el contacto visual, mira hacia la ventana"],
+   n2:["Posible estado depresivo con retraimiento social","Actitud defensiva o de resistencia a la evaluación","Descuido en el autocuidado como posible indicador de anhedonia","Dificultad para establecer vínculo terapéutico"],
+   preguntas_ref:["¿Qué le impidió llegar a tiempo?","¿Cómo ha estado durmiendo últimamente?","¿Está cuidando su alimentación e higiene diaria?","¿Hay algo que la incomode de estar aquí hoy?","¿Con qué frecuencia se siente así de retraída?"]},
+  {id:2, texto:`<strong>Caso 2 — Sebastián, 34 años:</strong> Ingresa al consultorio hablando antes de sentarse. Se mueve continuamente en la silla, cambia de postura cada pocos minutos. Habla a gran velocidad, sin pausas, saltando de un tema a otro. Ríe en momentos que no corresponden al contenido de la conversación. Sus ojos están muy abiertos y parpadea con frecuencia inusual.`,
+   n1:["Comienza a hablar antes de sentarse","Se mueve constantemente, cambia de postura","Habla a gran velocidad sin pausas","Salta de un tema a otro","Ríe en momentos inapropiados","Ojos muy abiertos, parpadeo frecuente"],
+   n2:["Posible estado hipomaníaco o maníaco","Pensamiento acelerado con posible fuga de ideas","Desinhibición conductual","Activación neurovegetativa visible (ojos abiertos, inquietud motora)"],
+   preguntas_ref:["¿Ha dormido bien esta semana? ¿Cuántas horas?","¿Siente que tiene mucha energía últimamente?","¿Ha tomado decisiones impulsivas recientemente?","¿Las personas cercanas le han dicho que está más activo de lo normal?","¿Cuándo comenzó a sentirse así?"]},
+  {id:3, texto:`<strong>Caso 3 — Rosa, 52 años:</strong> Se sienta en el extremo del asiento, con la espalda recta y las manos sobre las rodillas. Habla en voz muy baja. Hace pausas largas antes de responder. En dos ocasiones se le quiebra la voz y detiene el discurso. Sus ojos están enrojecidos. Al hablar de su familia, baja la cabeza y aprieta las manos.`,
+   n1:["Se sienta en el extremo del asiento","Espalda recta, manos sobre las rodillas","Habla en voz muy baja","Hace pausas largas antes de responder","La voz se le quiebra en dos ocasiones","Ojos enrojecidos","Baja la cabeza y aprieta las manos al hablar de familia"],
+   n2:["Posible estado de duelo o tristeza intensa","Dificultad para contener las emociones durante la evaluación","Tensión emocional asociada al tema familiar","Estado afectivo deprimido con labilidad emocional"],
+   preguntas_ref:["¿Ha podido llorar en estos días o siente que no puede?","¿Ha ocurrido algo recientemente con su familia?","¿Cómo está durmiendo y comiendo?","¿Tiene momentos del día en que se siente un poco mejor?","¿Tiene personas de confianza con quienes hablar?"]},
+  {id:4, texto:`<strong>Caso 4 — Tomás, 19 años:</strong> Ingresa con audífonos puestos y tarda en quitárselos. Se sienta recostado hacia atrás, con las piernas extendidas. Responde con frases cortas y en ocasiones encoge los hombros en lugar de responder verbalmente. Sonríe levemente cuando el evaluador hace una pregunta directa. Mira el teléfono dos veces durante la sesión.`,
+   n1:["Ingresa con audífonos, tarda en quitárselos","Se sienta recostado, piernas extendidas","Responde con frases cortas","Encoge los hombros en lugar de responder","Sonríe levemente ante preguntas directas","Mira el teléfono dos veces"],
+   n2:["Posible resistencia o baja motivación para la evaluación","Actitud de indiferencia como mecanismo defensivo","Dificultad para sostener la atención en el proceso","Posible comunicación no verbal evasiva"],
+   preguntas_ref:["¿Fue tu decisión venir hoy o te lo pidieron?","¿Qué esperas de estas sesiones?","¿Hay algo que te resulte difícil de hablar?","¿Cómo te llevas generalmente con personas nuevas?","¿Qué haces cuando algo te incomoda?"]},
+  {id:5, texto:`<strong>Caso 5 — Verónica, 41 años:</strong> Llega puntual y saluda con un apretón de mano firme. Se sienta erguida y mantiene contacto visual constante. Habla en voz clara y articulada. Sin embargo, sus respuestas son muy elaboradas y extensas para preguntas simples. Desvía el tema hacia quejas sobre otras personas con frecuencia. Al ser reconducida, suspira profundamente antes de continuar.`,
+   n1:["Llega puntual","Saludo con apretón de mano firme","Postura erguida, contacto visual constante","Voz clara y articulada","Respuestas extensas ante preguntas simples","Desvía el tema hacia quejas de terceros frecuentemente","Suspira profundamente al ser reconducida"],
+   n2:["Posible tendencia a la externalización de conflictos","Control superficial de la impresión que causa (belle indifférence o presentación cuidada)","Posible dificultad para la autorreferencia","Resistencia encubierta ante la conducción de la entrevista"],
+   preguntas_ref:["¿Cómo describiría usted misma su forma de relacionarse con los demás?","Además de lo que ocurre con otros, ¿cómo se siente usted en este momento?","¿Hay situaciones en que sienta que algo de lo que le pasa tiene que ver con usted?","¿Con qué frecuencia siente que los demás la decepcionan?","¿Qué la trajo a consulta hoy?"]},
+  {id:6, texto:`<strong>Caso 6 — Daniel, 23 años:</strong> Ingresa mirando hacia todos lados antes de sentarse. Elige la silla más alejada de la puerta. Durante la entrevista voltea la mirada hacia la puerta repetidamente. Habla en voz baja y verifica dos veces si la puerta está cerrada. Al hablar de su trabajo, se detiene, baja la voz aún más y pregunta si "alguien más puede escuchar".`,
+   n1:["Mira hacia todos lados al ingresar","Elige la silla más alejada de la puerta","Voltea la mirada hacia la puerta repetidamente","Habla en voz baja","Verifica dos veces si la puerta está cerrada","Pregunta si alguien más puede escuchar al hablar de trabajo"],
+   n2:["Posible ideación paranoide o hipervigilancia","Necesidad marcada de control del entorno como señal de ansiedad elevada","Posible vivencia de amenaza externa","Desconfianza ante el proceso evaluativo"],
+   preguntas_ref:["¿Suele sentirse vigilado o en peligro en otros lugares también?","¿Ha tenido experiencias en las que sintiera que alguien lo seguía o escuchaba?","¿Qué tan seguido siente esa necesidad de verificar que todo está bien?","¿Hay algo específico que le genera miedo en su trabajo?","¿Ha hablado de esto con alguien de confianza antes?"]},
+  {id:7, texto:`<strong>Caso 7 — Lorena, 37 años:</strong> Se presenta muy bien arreglada, con ropa formal y maquillaje elaborado. Sonríe de manera constante durante toda la sesión, incluso al relatar situaciones difíciles. Su voz es animada y su ritmo de habla es fluido. Sin embargo, al hablar de su madre, la sonrisa desaparece por un segundo y luego regresa de inmediato. Cruza los brazos brevemente en ese momento.`,
+   n1:["Bien arreglada, ropa formal, maquillaje elaborado","Sonríe de manera constante durante toda la sesión","Sonríe incluso al relatar situaciones difíciles","Voz animada, ritmo fluido","Al hablar de su madre la sonrisa desaparece por un segundo","Cruza los brazos brevemente al mencionar a su madre"],
+   n2:["Posible presentación de fachada (mecanismo de negación o racionalización)","Discordancia entre contenido emocional y expresión afectiva (incongruencia afectiva parcial)","Posible área de conflicto no elaborado asociada a la figura materna","Control emocional activo como estrategia defensiva"],
+   preguntas_ref:["¿Cómo es su relación con su madre?","¿Hay algo de esa relación que le resulte difícil de hablar?","¿Suele expresar sus emociones con facilidad o prefiere manejarlas sola?","¿Alguna vez ha sentido que sonríe aunque por dentro no se siente bien?","¿Qué cambiaría de esa relación si pudiera?"]},
+  {id:8, texto:`<strong>Caso 8 — Marcos, 45 años:</strong> Ingresa lentamente, con pasos arrastrando. Se sienta con dificultad y suspira al hacerlo. Permanece con los hombros caídos y la mirada fija en el suelo durante gran parte de la entrevista. Habla lentamente, con voz monótona. Al ser preguntado sobre sus actividades cotidianas, hace una pausa larga y responde: "ya nada, ya nada me da ganas".`,
+   n1:["Ingresa lentamente, pasos arrastrando","Se sienta con dificultad, suspira al hacerlo","Hombros caídos","Mirada fija en el suelo durante gran parte de la entrevista","Habla lentamente, con voz monótona","Pausa larga antes de responder","Dice literalmente: 'ya nada, ya nada me da ganas'"],
+   n2:["Enlentecimiento psicomotor compatible con cuadro depresivo","Posible anhedonia marcada","Desesperanza como elemento central del discurso","Estado afectivo deprimido con inhibición conductual"],
+   preguntas_ref:["¿Cuánto tiempo lleva sintiéndose así?","¿Ha tenido pensamientos de hacerse daño o de que sería mejor no estar?","¿Está durmiendo? ¿Está comiendo?","¿Hay alguna actividad que antes disfrutaba y que ahora ya no hace?","¿Tiene personas cercanas que sepan cómo se está sintiendo?"]}
+];
+
+const JUEGOS_DEF = [
+  {id:"J1", nombre:"Detecta el Primer Nivel", icon:"🔍", color:"azul", desc:"Lee el caso e identifica seleccionando SOLO las observaciones de primer nivel (objetivas, sin interpretación)."},
+  {id:"J2", nombre:"Construye la Inferencia", icon:"🧩", color:"morado", desc:"Dado un dato de primer nivel, escribe la inferencia clínica de segundo nivel que se puede construir."},
+  {id:"J3", nombre:"El Interrogatorio Clínico", icon:"❓", color:"naranja", desc:"A partir de las observaciones del caso, formula las preguntas que harías para recabar más información clínica."},
+  {id:"J4", nombre:"Clasifica la Observación", icon:"🏷️", color:"verde", desc:"Decide si cada observación pertenece al primer nivel (descripción) o al segundo nivel (inferencia)."},
+  {id:"J5", nombre:"Completa el Registro", icon:"📝", color:"rojo", desc:"Dado el caso, escribe qué registrarías en el campo de primer nivel Y qué en el campo de segundo nivel."}
+];
+
+let estadoApp = {
+  nombreEstudiante: localStorage.getItem("psi_nombre") || "",
+  sesionActual: null,
+  juegoActual: null,
+  casoActual: 0,
+  respuestas: JSON.parse(localStorage.getItem("psi_respuestas") || "[]"),
+  puntaje: 0,
+  seleccionadas: []
+};
+
+function guardarNombre() {
+  const n = document.getElementById("nombre-estudiante").value.trim();
+  if (!n) return alert("Por favor ingresa tu nombre.");
+  estadoApp.nombreEstudiante = n;
+  localStorage.setItem("psi_nombre", n);
+  document.getElementById("nombre-confirmado").style.display = "block";
+}
+
+function irInicio() { mostrarPantalla("inicio"); }
+function irTeoria() { mostrarPantalla("teoria"); }
+function irSesiones() { mostrarPantalla("sesiones"); renderSesiones(); }
+function volverJuegos() { mostrarPantalla("juegos"); renderJuegos(estadoApp.sesionActual); }
+
+function mostrarPantalla(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+function renderSesiones() {
+  const sesiones = [1, 2, 3, 4, 5, 6, 7, 8].map(n => ({num: n, nombre: `Sesión ${n}`, caso: CASOS[n - 1]}));
+  let html = `<h2 style="font-size:20px;font-weight:700;color:var(--azul);margin-bottom:8px">Elige una sesión</h2>
+  <p style="font-size:14px;color:#64748b;margin-bottom:20px">Cada sesión corresponde a un caso clínico distinto con los 5 juegos disponibles.</p>
+  <div class="sesion-grid">`;
+  sesiones.forEach(s => {
+    const completadas = estadoApp.respuestas.filter(r => r.sesion === s.num).length;
+    const cls = completadas >= 5 ? "completada" : "";
+    html += `<div class="sesion-card ${cls}" onclick="seleccionarSesion(${s.num})">
+      <div style="font-size:28px;margin-bottom:8px">${completadas >= 5 ? "✅" : "📋"}</div>
+      <div style="font-weight:700;font-size:15px;color:var(--azul)">Sesión ${s.num}</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px">Caso: ${s.caso.id}</div>
+      <div style="margin-top:8px"><span class="badge ${completadas >= 5 ? 'badge-verde' : 'badge-azul'}">${completadas}/5 juegos</span></div>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById("sesiones-lista").innerHTML = html;
+}
+
+function seleccionarSesion(num) {
+  estadoApp.sesionActual = num;
+  mostrarPantalla("juegos");
+  renderJuegos(num);
+}
+
+function renderJuegos(num) {
+  const caso = CASOS[num - 1];
+  document.getElementById("juegos-header-title").textContent = `Sesión ${num} — ${JUEGOS_DEF.length} juegos disponibles`;
+  let html = `<div class="card" style="margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:var(--azul2);margin-bottom:8px">CASO DE LA SESIÓN ${num}</div>
+    <div class="caso-box" style="margin-bottom:0">${caso.texto}</div>
+  </div>
+  <h3 style="font-size:17px;font-weight:700;color:var(--azul);margin-bottom:14px">Elige un juego:</h3>
+  <div style="display:flex;flex-direction:column;gap:12px">`;
+  JUEGOS_DEF.forEach(j => {
+    const hecho = estadoApp.respuestas.find(r => r.sesion === num && r.juego === j.id);
+    html += `<div class="juego-card" onclick="iniciarJuego(${num}, '${j.id}')">
+      <div class="juego-icon" style="background:var(--${j.color === 'azul' ? 'azul3' : j.color === 'morado' ? 'morado2' : j.color === 'naranja' ? 'naranja2' : j.color === 'verde' ? 'verde2' : 'rojo2'})">${j.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:700;color:var(--azul);margin-bottom:4px">${j.nombre}</div>
+        <div style="font-size:13px;color:#64748b">${j.desc}</div>
+      </div>
+      ${hecho ? '<span class="badge badge-verde">✅ Hecho</span>' : '<span class="badge badge-azul">→ Jugar</span>'}
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById("juegos-lista").innerHTML = html;
+}
+
+function iniciarJuego(sesion, juegoId) {
+  if (!estadoApp.nombreEstudiante) {
+    alert("Primero ingresa tu nombre en la pantalla de inicio.");
+    irInicio();
+    return;
+  }
+  estadoApp.sesionActual = sesion;
+  estadoApp.juegoActual = juegoId;
+  estadoApp.casoActual = sesion - 1;
+  estadoApp.puntaje = 0;
+  estadoApp.seleccionadas = [];
+  const juego = JUEGOS_DEF.find(j => j.id === juegoId);
+  document.getElementById("juego-titulo-header").textContent = `${juego.icon} ${juego.nombre} — Sesión ${sesion}`;
+  mostrarPantalla("juego");
+  renderJuegoActivo();
+}
+
+function renderJuegoActivo() {
+  const caso = CASOS[estadoApp.casoActual];
+  const juegoId = estadoApp.juegoActual;
+  if (juegoId === "J1") renderJ1(caso);
+  else if (juegoId === "J2") renderJ2(caso);
+  else if (juegoId === "J3") renderJ3(caso);
+  else if (juegoId === "J4") renderJ4(caso);
+  else if (juegoId === "J5") renderJ5(caso);
+}
+
+// ─── JUEGO 1: Detecta el Primer Nivel ───
+function renderJ1(caso) {
+  const todasObs = shuffleArr([...caso.n1.map(t => ({txt: t, nivel: 1})), ...caso.n2.map(t => ({txt: t, nivel: 2}))]);
+  estadoApp.j1data = todasObs;
+  estadoApp.seleccionadas = [];
+  let tagsHtml = todasObs.map((o, i) => `<span class="tag tag-neutral" id="tag-j1-${i}" onclick="toggleTagJ1(${i})">${o.txt}</span>`).join("");
+  document.getElementById("juego-contenido").innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--azul2);margin-bottom:8px">🔍 JUEGO 1 — DETECTA EL PRIMER NIVEL</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:14px">Lee el caso y selecciona <strong>SOLO</strong> las observaciones de <strong>primer nivel</strong> (objetivas, descriptivas, sin interpretación). Las demás son inferencias de segundo nivel.</p>
+      <div class="caso-box">${caso.texto}</div>
+    </div>
+    <div class="card">
+      <p style="font-size:14px;font-weight:600;color:var(--azul);margin-bottom:12px">Selecciona las observaciones de PRIMER NIVEL:</p>
+      <div id="tags-j1" style="margin-bottom:16px">${tagsHtml}</div>
+      <div id="feedback-j1"></div>
+      <div class="nav-bottom">
+        <div style="font-size:13px;color:#64748b">Seleccionadas: <span id="count-j1">0</span></div>
+        <button class="btn btn-primary" onclick="verificarJ1()">Verificar respuesta</button>
+      </div>
+    </div>`;
+}
+
+function toggleTagJ1(i) {
+  const idx = estadoApp.seleccionadas.indexOf(i);
+  const el = document.getElementById("tag-j1-" + i);
+  if (idx === -1) {
+    estadoApp.seleccionadas.push(i);
+    el.className = "tag tag-selected-azul";
+  } else {
+    estadoApp.seleccionadas.splice(idx, 1);
+    el.className = "tag tag-neutral";
+  }
+  document.getElementById("count-j1").textContent = estadoApp.seleccionadas.length;
+}
+
+function verificarJ1() {
+  const data = estadoApp.j1data;
+  const sel = estadoApp.seleccionadas;
+  const correctas = data.map((o, i) => o.nivel === 1 ? i : null).filter(i => i !== null);
+  let aciertos = 0, errores = 0;
+  data.forEach((o, i) => {
+    const el = document.getElementById("tag-j1-" + i);
+    const seleccionado = sel.includes(i);
+    if (o.nivel === 1 && seleccionado) { el.className = "tag tag-correct-final"; aciertos++; }
+    else if (o.nivel === 1 && !seleccionado) { el.className = "tag tag-selected-verde"; el.style.border = "2px dashed var(--verde)"; }
+    else if (o.nivel === 2 && seleccionado) { el.className = "tag tag-incorrect-final"; errores++; }
+    else { el.className = "tag tag-neutral"; }
+  });
+  const pct = Math.round((aciertos / correctas.length) * 100);
+  const fb = document.getElementById("feedback-j1");
+  fb.innerHTML = `<div class="feedback-box ${pct >= 70 ? 'feedback-ok' : 'feedback-mal'}">
+    <strong>${pct >= 70 ? "✅ ¡Bien hecho!" : "⚠️ Revisa tu selección"}</strong><br>
+    Identificaste correctamente ${aciertos} de ${correctas.length} observaciones de primer nivel. ${errores > 0 ? `Seleccionaste ${errores} inferencia(s) de segundo nivel por error.` : ""}
+    <br><br><em>Las observaciones de primer nivel son aquellas que describen hechos objetivos y verificables, sin interpretación clínica.</em>
+  </div>
+  <div class="nav-bottom">
+    <div></div>
+    <button class="btn btn-success" onclick="guardarYSiguiente('J1', 'Aciertos: ${aciertos}/${correctas.length}')">Guardar y continuar →</button>
+  </div>`;
+}
+
+// ─── JUEGO 2: Construye la Inferencia ───
+function renderJ2(caso) {
+  const obs = caso.n1.slice(0, 4);
+  estadoApp.j2obs = obs;
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;color:var(--morado);margin-bottom:8px">🧩 JUEGO 2 — CONSTRUYE LA INFERENCIA</div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:14px">Para cada observación de primer nivel, escribe una inferencia clínica de segundo nivel. ¿Qué podría significar clínicamente lo que observas?</p>
+    <div class="caso-box">${caso.texto}</div>
+  </div>
+  <div class="card">
+    <p style="font-size:14px;font-weight:600;color:var(--morado);margin-bottom:14px">Construye el segundo nivel para cada observación:</p>`;
+  obs.forEach((o, i) => {
+    html += `<div style="margin-bottom:18px;padding:14px;background:var(--morado2);border-radius:10px;border-left:4px solid var(--morado)">
+      <div style="font-size:13px;font-weight:700;color:var(--morado);margin-bottom:4px">Observación (1er nivel):</div>
+      <div style="font-size:14px;color:#1a1a2e;margin-bottom:10px">"${o}"</div>
+      <label style="font-size:13px;font-weight:600;color:#4A1D96;display:block;margin-bottom:6px">Tu inferencia (2do nivel):</label>
+      <textarea id="j2-resp-${i}" placeholder="Ej: Esto podría indicar..."></textarea>
+    </div>`;
+  });
+  html += `<div id="feedback-j2"></div>
+  <div class="nav-bottom">
+    <div></div>
+    <button class="btn btn-morado" onclick="verificarJ2()">Ver referencia y guardar →</button>
+  </div></div>`;
+  document.getElementById("juego-contenido").innerHTML = html;
+}
+
+function verificarJ2() {
+  const caso = CASOS[estadoApp.casoActual];
+  const obs = estadoApp.j2obs;
+  let respTexto = [];
+  obs.forEach((o, i) => {
+    const r = document.getElementById("j2-resp-" + i).value.trim();
+    respTexto.push(`[${o}] → ${r || "(sin respuesta)"}`);
+  });
+  let refHtml = caso.n2.map(r => `<li style="font-size:13px;line-height:1.7;color:#3b0764">${r}</li>`).join("");
+  document.getElementById("feedback-j2").innerHTML = `<div class="feedback-box feedback-ok">
+    <strong>✅ Respuestas guardadas</strong><br>
+    <em>Ejemplos de inferencias de segundo nivel para este caso (referencia docente):</em>
+    <ul style="margin-top:8px;padding-left:18px">${refHtml}</ul>
+  </div>
+  <div class="nav-bottom"><div></div><button class="btn btn-success" onclick="guardarYSiguiente('J2', \`${respTexto.join(' | ')}\`)">Guardar y continuar →</button></div>`;
+}
+
+// ─── JUEGO 3: El Interrogatorio Clínico ───
+function renderJ3(caso) {
+  document.getElementById("juego-contenido").innerHTML = `
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;color:var(--naranja);margin-bottom:8px">❓ JUEGO 3 — EL INTERROGATORIO CLÍNICO</div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:14px">Basándote en las observaciones del caso, formula <strong>al menos 4 preguntas</strong> que harías para recabar más información clínica. Piensa: ¿qué necesito saber para comprender mejor la situación?</p>
+    <div class="caso-box">${caso.texto}</div>
+  </div>
+  <div class="card">
+    <p style="font-size:14px;font-weight:600;color:var(--naranja);margin-bottom:12px">Escribe tus preguntas clínicas:</p>
+    ${[1,2,3,4,5].map(n => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:13px;font-weight:700;color:var(--naranja);min-width:24px">${n}.</span>
+      <input type="text" id="j3-p${n}" placeholder="Escribe tu pregunta aquí...">
+    </div>`).join("")}
+    <div id="feedback-j3"></div>
+    <div class="nav-bottom"><div></div><button class="btn btn-naranja" onclick="verificarJ3()">Ver referencia y guardar →</button></div>
+  </div>`;
+}
+
+function verificarJ3() {
+  const caso = CASOS[estadoApp.casoActual];
+  let pregs = [];
+  for (let n = 1; n <= 5; n++) {
+    const v = document.getElementById("j3-p" + n).value.trim();
+    if (v) pregs.push(v);
+  }
+  if (pregs.length < 2) { alert("Por favor escribe al menos 2 preguntas."); return; }
+  let refHtml = caso.preguntas_ref.map(p => `<li style="font-size:13px;line-height:1.7;color:#7c2d12">${p}</li>`).join("");
+  document.getElementById("feedback-j3").innerHTML = `<div class="feedback-box" style="background:var(--naranja2);border-left:4px solid var(--naranja);color:#7c2d12">
+    <strong>✅ ${pregs.length} preguntas registradas</strong><br>
+    <em>Algunas preguntas de referencia para este caso:</em>
+    <ul style="margin-top:8px;padding-left:18px">${refHtml}</ul>
+  </div>
+  <div class="nav-bottom"><div></div><button class="btn btn-success" onclick="guardarYSiguiente('J3', \`${pregs.join(' | ')}\`)">Guardar y continuar →</button></div>`;
+}
+
+// ─── JUEGO 4: Clasifica la Observación ───
+function renderJ4(caso) {
+  const items = shuffleArr([
+    ...caso.n1.map(t => ({txt: t, nivel: 1})),
+    ...caso.n2.map(t => ({txt: t, nivel: 2}))
+  ]).slice(0, 8);
+  estadoApp.j4items = items;
+  estadoApp.j4resp = {};
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;color:var(--verde);margin-bottom:8px">🏷️ JUEGO 4 — CLASIFICA LA OBSERVACIÓN</div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:14px">Para cada enunciado, decide si es una observación de <strong>Primer Nivel</strong> (descripción objetiva) o de <strong>Segundo Nivel</strong> (inferencia clínica).</p>
+    <div class="caso-box">${caso.texto}</div>
+  </div>
+  <div class="card">
+    <p style="font-size:14px;font-weight:600;color:var(--verde);margin-bottom:14px">Clasifica cada observación:</p>`;
+  items.forEach((item, i) => {
+    html += `<div id="j4-item-${i}" style="margin-bottom:12px;padding:14px;background:#f8fafc;border-radius:10px;border:1.5px solid var(--borde)">
+      <div style="font-size:14px;color:#1e293b;margin-bottom:10px">"${item.txt}"</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline btn-sm" id="j4-b1-${i}" onclick="clasificarJ4(${i}, 1)" style="flex:1">🔵 Primer Nivel</button>
+        <button class="btn btn-outline btn-sm" id="j4-b2-${i}" onclick="clasificarJ4(${i}, 2)" style="flex:1">🟣 Segundo Nivel</button>
+      </div>
+    </div>`;
+  });
+  html += `<div id="feedback-j4"></div>
+  <div class="nav-bottom">
+    <div style="font-size:13px;color:#64748b">Clasificadas: <span id="count-j4">0</span>/${items.length}</div>
+    <button class="btn btn-success" onclick="verificarJ4()">Verificar</button>
+  </div></div>`;
+  document.getElementById("juego-contenido").innerHTML = html;
+}
+
+function clasificarJ4(i, nivel) {
+  estadoApp.j4resp[i] = nivel;
+  const b1 = document.getElementById("j4-b1-" + i);
+  const b2 = document.getElementById("j4-b2-" + i);
+  if (nivel === 1) { b1.style.background = "var(--azul3)"; b1.style.borderColor = "var(--azul2)"; b2.style.background = ""; b2.style.borderColor = ""; }
+  else { b2.style.background = "var(--morado2)"; b2.style.borderColor = "var(--morado)"; b1.style.background = ""; b1.style.borderColor = ""; }
+  document.getElementById("count-j4").textContent = Object.keys(estadoApp.j4resp).length;
+}
+
+function verificarJ4() {
+  const items = estadoApp.j4items;
+  const resp = estadoApp.j4resp;
+  if (Object.keys(resp).length < items.length) { alert("Clasifica todos los enunciados antes de verificar."); return; }
+  let correctas = 0;
+  items.forEach((item, i) => {
+    const el = document.getElementById("j4-item-" + i);
+    const ok = resp[i] === item.nivel;
+    if (ok) { el.style.border = "2px solid #059669"; el.style.background = "#d1fae5"; correctas++; }
+    else { el.style.border = "2px solid #dc2626"; el.style.background = "#fee2e2";
+      el.innerHTML += `<div style="font-size:12px;color:#991b1b;margin-top:6px">✗ Era ${item.nivel === 1 ? "Primer Nivel" : "Segundo Nivel"}</div>`; }
+  });
+  const pct = Math.round((correctas / items.length) * 100);
+  document.getElementById("feedback-j4").innerHTML = `<div class="feedback-box ${pct >= 70 ? 'feedback-ok' : 'feedback-mal'}">
+    <strong>${pct >= 70 ? "✅ ¡Excelente clasificación!" : "⚠️ Sigue practicando"}</strong><br>
+    Acertaste ${correctas} de ${items.length} clasificaciones (${pct}%).
+  </div>
+  <div class="nav-bottom"><div></div><button class="btn btn-success" onclick="guardarYSiguiente('J4', 'Aciertos: ${correctas}/${items.length}')">Guardar y continuar →</button></div>`;
+}
+
+// ─── JUEGO 5: Completa el Registro ───
+function renderJ5(caso) {
+  document.getElementById("juego-contenido").innerHTML = `
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;color:var(--rojo);margin-bottom:8px">📝 JUEGO 5 — COMPLETA EL REGISTRO CLÍNICO</div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:14px">Lee el caso y completa la ficha clínica escribiendo tus propias observaciones en el campo de primer nivel y tus propias inferencias en el campo de segundo nivel.</p>
+    <div class="caso-box">${caso.texto}</div>
+  </div>
+  <div class="card">
+    <div style="margin-bottom:20px;padding:16px;background:var(--azul3);border-radius:12px;border-left:5px solid var(--azul2)">
+      <label style="font-size:14px;font-weight:700;color:var(--azul);display:block;margin-bottom:8px">🔵 PRIMER NIVEL — Descripción objetiva de lo observado:</label>
+      <textarea id="j5-n1" placeholder="Describe lo que observarías directamente: apariencia, conducta motora, expresión facial, habla, postura... sin interpretar." style="min-height:120px"></textarea>
+    </div>
+    <div style="padding:16px;background:var(--morado2);border-radius:12px;border-left:5px solid var(--morado)">
+      <label style="font-size:14px;font-weight:700;color:var(--morado);display:block;margin-bottom:8px">🟣 SEGUNDO NIVEL — Inferencias clínicas:</label>
+      <textarea id="j5-n2" placeholder="A partir de lo que observaste, ¿qué hipótesis clínicas puedes construir? ¿Qué podría estar indicando clínicamente?" style="min-height:120px"></textarea>
+    </div>
+    <div id="feedback-j5"></div>
+    <div class="nav-bottom"><div></div><button class="btn btn-danger" onclick="verificarJ5()">Ver referencia y guardar →</button></div>
+  </div>`;
+}
+
+function verificarJ5() {
+  const n1 = document.getElementById("j5-n1").value.trim();
+  const n2 = document.getElementById("j5-n2").value.trim();
+  if (!n1 || !n2) { alert("Completa ambos campos antes de continuar."); return; }
+  const caso = CASOS[estadoApp.casoActual];
+  let ref1 = caso.n1.slice(0, 4).map(r => `<li style="font-size:13px;line-height:1.7">${r}</li>`).join("");
+  let ref2 = caso.n2.slice(0, 3).map(r => `<li style="font-size:13px;line-height:1.7">${r}</li>`).join("");
+  document.getElementById("feedback-j5").innerHTML = `<div class="feedback-box feedback-ok" style="margin-top:16px">
+    <strong>✅ Registro guardado</strong><br>
+    <em>Referencia docente — Primer nivel del caso:</em>
+    <ul style="margin-top:6px;padding-left:18px">${ref1}</ul>
+    <em style="display:block;margin-top:10px">Referencia docente — Segundo nivel del caso:</em>
+    <ul style="margin-top:6px;padding-left:18px">${ref2}</ul>
+  </div>
+  <div class="nav-bottom"><div></div><button class="btn btn-success" onclick="guardarYSiguiente('J5', \`N1: ${n1} || N2: ${n2}\`)">Guardar y finalizar sesión →</button></div>`;
+}
+
+// ─── GUARDAR Y ENVIAR ───
+function guardarYSiguiente(juegoId, respuesta) {
+  const entrada = {
+    fecha: new Date().toLocaleString("es-EC"),
+    nombre: estadoApp.nombreEstudiante,
+    sesion: estadoApp.sesionActual,
+    juego: juegoId,
+    juego_nombre: JUEGOS_DEF.find(j => j.id === juegoId).nombre,
+    respuesta: respuesta
+  };
+  estadoApp.respuestas.push(entrada);
+  localStorage.setItem("psi_respuestas", JSON.stringify(estadoApp.respuestas));
+  enviarGoogleSheets(entrada);
+  volverJuegos();
+}
+
+async function enviarGoogleSheets(data) {
+  if (CONFIG.SCRIPT_URL === "PEGAR_URL_AQUI") return;
+  try {
+    await fetch(CONFIG.SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
+  } catch (e) { console.log("Error al enviar a Sheets:", e); }
+}
+
+// ─── ADMIN ───
+function abrirAdmin() {
+  document.getElementById("modal-admin").style.display = "flex";
+  document.getElementById("admin-login").style.display = "block";
+  document.getElementById("admin-panel").style.display = "none";
+  document.getElementById("admin-error").style.display = "none";
+}
+
+function cerrarAdmin() { document.getElementById("modal-admin").style.display = "none"; }
+
+function verificarAdmin() {
+  const pass = document.getElementById("admin-pass").value;
+  if (pass === CONFIG.PASSWORD) {
+    document.getElementById("admin-login").style.display = "none";
+    document.getElementById("admin-panel").style.display = "block";
+    renderTablaAdmin();
+  } else {
+    document.getElementById("admin-error").style.display = "block";
+  }
+}
+
+function renderTablaAdmin(filtro = "") {
+  let datos = estadoApp.respuestas;
+  if (filtro) datos = datos.filter(r => r.juego === filtro);
+  if (!datos.length) {
+    document.getElementById("admin-tabla").innerHTML = `<p style="font-size:14px;color:#64748b;text-align:center;padding:20px">No hay respuestas registradas aún.</p>`;
+    return;
+  }
+  let html = `<table class="admin-table"><thead><tr>
+    <th>Fecha</th><th>Estudiante</th><th>Sesión</th><th>Juego</th><th>Respuesta</th>
+  </tr></thead><tbody>`;
+  datos.forEach(r => {
+    html += `<tr><td style="white-space:nowrap">${r.fecha}</td><td><strong>${r.nombre}</strong></td>
+    <td style="text-align:center">${r.sesion}</td>
+    <td><span class="badge badge-azul">${r.juego}</span><br><small>${r.juego_nombre}</small></td>
+    <td class="resp-cell">${r.respuesta}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById("admin-tabla").innerHTML = html;
+}
+
+function filtrarRespuestas() {
+  const f = document.getElementById("admin-filtro").value;
+  renderTablaAdmin(f);
+}
+
+function exportarCSV() {
+  const datos = estadoApp.respuestas;
+  if (!datos.length) { alert("No hay datos para exportar."); return; }
+  const cols = ["fecha", "nombre", "sesion", "juego", "juego_nombre", "respuesta"];
+  let csv = cols.join(",") + "\n";
+  datos.forEach(r => {
+    csv += cols.map(c => `"${(r[c] || "").toString().replace(/"/g, "'")}""`).join(",") + "\n";
+  });
+  const blob = new Blob([csv], {type: "text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "respuestas_psicodiagnostico.csv";
+  a.click();
+}
+
+// ─── UTILS ───
+function shuffleArr(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Init
+if (estadoApp.nombreEstudiante) {
+  document.getElementById("nombre-estudiante").value = estadoApp.nombreEstudiante;
+}
+</script>
+</body>
+</html>
