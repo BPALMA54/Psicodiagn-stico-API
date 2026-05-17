@@ -287,16 +287,18 @@ table.admin-table tr:nth-child(even) td{background:#f8fafc}
     </div>
     <div id="admin-error" style="display:none;color:var(--rojo);font-size:13px;margin-top:8px">❌ Contraseña incorrecta</div>
   </div>
- <div id="admin-panel" style="display:none">
+  <div id="admin-panel" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <span class="badge badge-verde">✅ Acceso concedido</span>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="cargarDesdeSheets()">🔄 Actualizar</button>
         <button class="btn btn-primary btn-sm" onclick="exportarCSV()">⬇ CSV</button>
         <button class="btn btn-outline btn-sm" onclick="cerrarAdmin()">Cerrar</button>
       </div>
     </div>
+    <div id="admin-cargando" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--azul2)">⏳ Cargando datos desde Google Sheets...</div>
     <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-      <div style="flex:1;min-width:140px">
+      <div style="flex:1;min-width:130px">
         <label style="font-size:12px;font-weight:600;color:var(--azul);display:block;margin-bottom:4px">Filtrar por juego:</label>
         <select id="admin-filtro" onchange="filtrarRespuestas()">
           <option value="">Todos los juegos</option>
@@ -307,9 +309,9 @@ table.admin-table tr:nth-child(even) td{background:#f8fafc}
           <option value="J5">Completa el Registro</option>
         </select>
       </div>
-      <div style="flex:1;min-width:140px">
+      <div style="flex:1;min-width:130px">
         <label style="font-size:12px;font-weight:600;color:var(--azul);display:block;margin-bottom:4px">Filtrar por estudiante:</label>
-        <select id="admin-filtro-estudiante" onchange="filtrarRespuestas()">
+        <select id="admin-filtro-est" onchange="filtrarRespuestas()">
           <option value="">Todos los estudiantes</option>
         </select>
       </div>
@@ -323,7 +325,7 @@ table.admin-table tr:nth-child(even) td{background:#f8fafc}
 <script>
 const CONFIG = {
   PASSWORD: "palma2025",
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxv5Ae_jJnHqaJA4lc6FXRdhXlFBrPKpxdsdSgKgglK5mQcnBkl0kWuoFvlDSPRveCm/exec"
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxoLe1rbTBnr8URAx9kybyyXjWhLCXFOHoggdPGzr_ra0_uKFCe5MbEWS5UG1ev8urg/exec"
 };
 
 const CASOS = [
@@ -745,6 +747,8 @@ async function enviarGoogleSheets(data) {
 }
 
 // ─── ADMIN ───
+let datosSheets = [];
+
 function abrirAdmin() {
   document.getElementById("modal-admin").style.display = "flex";
   document.getElementById("admin-login").style.display = "block";
@@ -759,34 +763,65 @@ function verificarAdmin() {
   if (pass === CONFIG.PASSWORD) {
     document.getElementById("admin-login").style.display = "none";
     document.getElementById("admin-panel").style.display = "block";
-    renderTablaAdmin();
+    cargarDesdeSheets();
   } else {
     document.getElementById("admin-error").style.display = "block";
   }
 }
 
-function renderTablaAdmin(filtroJuego, filtroEst) {
-  if (filtroJuego === undefined) filtroJuego = document.getElementById("admin-filtro").value;
-  if (filtroEst === undefined) filtroEst = document.getElementById("admin-filtro-estudiante").value;
-  let datos = estadoApp.respuestas;
-  const nombres = [...new Set(datos.map(r => r.nombre))].filter(Boolean);
-  const sel = document.getElementById("admin-filtro-estudiante");
-  const valActual = sel.value;
+async function cargarDesdeSheets() {
+  document.getElementById("admin-cargando").style.display = "block";
+  document.getElementById("admin-tabla").innerHTML = "";
+  document.getElementById("admin-resumen").innerHTML = "";
+  try {
+    const url = CONFIG.SCRIPT_URL + "?action=get&app=psi";
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if (json.status === "ok" && Array.isArray(json.datos)) {
+      datosSheets = json.datos;
+    } else {
+      datosSheets = [];
+    }
+  } catch(e) {
+    datosSheets = [];
+    console.log("Error al leer Sheets:", e);
+  }
+  document.getElementById("admin-cargando").style.display = "none";
+  poblarFiltroEstudiantes();
+  renderTablaAdmin();
+}
+
+function poblarFiltroEstudiantes() {
+  const nombres = [...new Set(datosSheets.map(r => r.nombre))].filter(Boolean).sort();
+  const sel = document.getElementById("admin-filtro-est");
+  const va = sel.value;
   sel.innerHTML = '<option value="">Todos los estudiantes</option>';
-  nombres.forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n; if (n === valActual) o.selected = true; sel.appendChild(o); });
-  if (filtroJuego) datos = datos.filter(r => r.juego === filtroJuego);
-  if (filtroEst) datos = datos.filter(r => r.nombre === filtroEst);
+  nombres.forEach(n => {
+    const o = document.createElement("option");
+    o.value = n; o.textContent = n;
+    if (n === va) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function renderTablaAdmin() {
+  const fj = document.getElementById("admin-filtro").value;
+  const fe = document.getElementById("admin-filtro-est").value;
+  let datos = [...datosSheets];
+  if (fj) datos = datos.filter(r => r.juego === fj);
+  if (fe) datos = datos.filter(r => r.nombre === fe);
   const resumen = document.getElementById("admin-resumen");
-  if (filtroEst) {
+  if (fe) {
     const juegosHechos = [...new Set(datos.map(r => r.juego))];
     resumen.innerHTML = `<div style="background:var(--azul3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--azul)">
-      <strong>${filtroEst}</strong> — ${datos.length} respuesta(s) registrada(s) | Juegos completados: ${juegosHechos.join(", ") || "ninguno"}
+      <strong>${fe}</strong> — ${datos.length} respuesta(s) | Juegos completados: <strong>${juegosHechos.join(", ") || "ninguno"}</strong>
     </div>`;
   } else {
-    const total = estadoApp.respuestas.length;
-    const estudiantesActivos = new Set(estadoApp.respuestas.map(r => r.nombre)).size;
+    const total = datosSheets.length;
+    const ests = new Set(datosSheets.map(r => r.nombre)).size;
     resumen.innerHTML = `<div style="background:var(--azul3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--azul)">
-      Total registros: <strong>${total}</strong> | Estudiantes activos: <strong>${estudiantesActivos}</strong>
+      Total registros: <strong>${total}</strong> | Estudiantes activos: <strong>${ests}</strong>
+      ${!total ? ' — <em>Haz clic en 🔄 Actualizar para cargar los datos</em>' : ''}
     </div>`;
   }
   if (!datos.length) {
@@ -797,10 +832,11 @@ function renderTablaAdmin(filtroJuego, filtroEst) {
     <th>Fecha</th><th>Estudiante</th><th>Sesión</th><th>Juego</th><th>Respuesta</th>
   </tr></thead><tbody>`;
   datos.forEach(r => {
-    html += `<tr><td style="white-space:nowrap">${r.fecha}</td><td><strong>${r.nombre}</strong></td>
-    <td style="text-align:center">${r.sesion}</td>
-    <td><span class="badge badge-azul">${r.juego}</span><br><small>${r.juego_nombre}</small></td>
-    <td class="resp-cell">${r.respuesta}</td></tr>`;
+    html += `<tr><td style="white-space:nowrap;font-size:12px">${r.fecha||""}</td>
+    <td><strong>${r.nombre||""}</strong></td>
+    <td style="text-align:center">${r.sesion||""}</td>
+    <td><span class="badge badge-azul">${r.juego||""}</span><br><small>${r.juego_nombre||""}</small></td>
+    <td class="resp-cell">${r.respuesta||""}</td></tr>`;
   });
   html += `</tbody></table>`;
   document.getElementById("admin-tabla").innerHTML = html;
@@ -809,12 +845,11 @@ function renderTablaAdmin(filtroJuego, filtroEst) {
 function filtrarRespuestas() { renderTablaAdmin(); }
 
 function exportarCSV() {
-  const datos = estadoApp.respuestas;
-  if (!datos.length) { alert("No hay datos para exportar."); return; }
+  if (!datosSheets.length) { alert("No hay datos. Haz clic en Actualizar primero."); return; }
   const cols = ["fecha", "nombre", "sesion", "juego", "juego_nombre", "respuesta"];
   let csv = cols.join(",") + "\n";
-  datos.forEach(r => {
-    csv += cols.map(c => `"${(r[c] || "").toString().replace(/"/g, "'")}""`).join(",") + "\n";
+  datosSheets.forEach(r => {
+    csv += cols.map(c => `"${(r[c] || "").toString().replace(/"/g, "'")}"`).join(",") + "\n";
   });
   const blob = new Blob([csv], {type: "text/csv"});
   const a = document.createElement("a");
@@ -822,7 +857,7 @@ function exportarCSV() {
   a.download = "respuestas_psicodiagnostico.csv";
   a.click();
 }
-  
+
 // ─── UTILS ───
 function shuffleArr(arr) {
   const a = [...arr];
