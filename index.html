@@ -287,26 +287,35 @@ table.admin-table tr:nth-child(even) td{background:#f8fafc}
     </div>
     <div id="admin-error" style="display:none;color:var(--rojo);font-size:13px;margin-top:8px">❌ Contraseña incorrecta</div>
   </div>
-  <div id="admin-panel" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+ <div id="admin-panel" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <span class="badge badge-verde">✅ Acceso concedido</span>
-      <button class="btn btn-outline btn-sm" onclick="cerrarAdmin()">Cerrar</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="exportarCSV()">⬇ CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="cerrarAdmin()">Cerrar</button>
+      </div>
     </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:13px;font-weight:600;color:var(--azul);display:block;margin-bottom:6px">Filtrar por juego:</label>
-      <select id="admin-filtro" onchange="filtrarRespuestas()">
-        <option value="">Todos los juegos</option>
-        <option value="J1">Detecta el Primer Nivel</option>
-        <option value="J2">Construye la Inferencia</option>
-        <option value="J3">El Interrogatorio Clínico</option>
-        <option value="J4">Clasifica la Observación</option>
-        <option value="J5">Completa el Registro</option>
-      </select>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:140px">
+        <label style="font-size:12px;font-weight:600;color:var(--azul);display:block;margin-bottom:4px">Filtrar por juego:</label>
+        <select id="admin-filtro" onchange="filtrarRespuestas()">
+          <option value="">Todos los juegos</option>
+          <option value="J1">Detecta el Primer Nivel</option>
+          <option value="J2">Construye la Inferencia</option>
+          <option value="J3">El Interrogatorio Clínico</option>
+          <option value="J4">Clasifica la Observación</option>
+          <option value="J5">Completa el Registro</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <label style="font-size:12px;font-weight:600;color:var(--azul);display:block;margin-bottom:4px">Filtrar por estudiante:</label>
+        <select id="admin-filtro-estudiante" onchange="filtrarRespuestas()">
+          <option value="">Todos los estudiantes</option>
+        </select>
+      </div>
     </div>
-    <div id="admin-tabla" style="overflow-x:auto;max-height:400px;overflow-y:auto"></div>
-    <div style="margin-top:12px">
-      <button class="btn btn-primary btn-sm" onclick="exportarCSV()">⬇ Exportar CSV</button>
-    </div>
+    <div id="admin-resumen" style="margin-bottom:10px"></div>
+    <div id="admin-tabla" style="overflow-x:auto;max-height:420px;overflow-y:auto"></div>
   </div>
 </div>
 </div>
