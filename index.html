@@ -765,11 +765,32 @@ function verificarAdmin() {
   }
 }
 
-function renderTablaAdmin(filtro = "") {
+function renderTablaAdmin(filtroJuego, filtroEst) {
+  if (filtroJuego === undefined) filtroJuego = document.getElementById("admin-filtro").value;
+  if (filtroEst === undefined) filtroEst = document.getElementById("admin-filtro-estudiante").value;
   let datos = estadoApp.respuestas;
-  if (filtro) datos = datos.filter(r => r.juego === filtro);
+  const nombres = [...new Set(datos.map(r => r.nombre))].filter(Boolean);
+  const sel = document.getElementById("admin-filtro-estudiante");
+  const valActual = sel.value;
+  sel.innerHTML = '<option value="">Todos los estudiantes</option>';
+  nombres.forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n; if (n === valActual) o.selected = true; sel.appendChild(o); });
+  if (filtroJuego) datos = datos.filter(r => r.juego === filtroJuego);
+  if (filtroEst) datos = datos.filter(r => r.nombre === filtroEst);
+  const resumen = document.getElementById("admin-resumen");
+  if (filtroEst) {
+    const juegosHechos = [...new Set(datos.map(r => r.juego))];
+    resumen.innerHTML = `<div style="background:var(--azul3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--azul)">
+      <strong>${filtroEst}</strong> — ${datos.length} respuesta(s) registrada(s) | Juegos completados: ${juegosHechos.join(", ") || "ninguno"}
+    </div>`;
+  } else {
+    const total = estadoApp.respuestas.length;
+    const estudiantesActivos = new Set(estadoApp.respuestas.map(r => r.nombre)).size;
+    resumen.innerHTML = `<div style="background:var(--azul3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--azul)">
+      Total registros: <strong>${total}</strong> | Estudiantes activos: <strong>${estudiantesActivos}</strong>
+    </div>`;
+  }
   if (!datos.length) {
-    document.getElementById("admin-tabla").innerHTML = `<p style="font-size:14px;color:#64748b;text-align:center;padding:20px">No hay respuestas registradas aún.</p>`;
+    document.getElementById("admin-tabla").innerHTML = `<p style="font-size:14px;color:#64748b;text-align:center;padding:20px">No hay respuestas para este filtro.</p>`;
     return;
   }
   let html = `<table class="admin-table"><thead><tr>
@@ -785,10 +806,7 @@ function renderTablaAdmin(filtro = "") {
   document.getElementById("admin-tabla").innerHTML = html;
 }
 
-function filtrarRespuestas() {
-  const f = document.getElementById("admin-filtro").value;
-  renderTablaAdmin(f);
-}
+function filtrarRespuestas() { renderTablaAdmin(); }
 
 function exportarCSV() {
   const datos = estadoApp.respuestas;
@@ -804,7 +822,7 @@ function exportarCSV() {
   a.download = "respuestas_psicodiagnostico.csv";
   a.click();
 }
-
+  
 // ─── UTILS ───
 function shuffleArr(arr) {
   const a = [...arr];
